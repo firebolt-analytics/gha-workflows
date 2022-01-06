@@ -64,5 +64,5 @@ jobs:
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.version.outputs.new_release_version }}
-          body: ${{ needs.version.outputs.new_release_notes }}
+          tag_name: v${{ needs.generate.outputs.new_release_version }}
+          body: ${{ needs.generate.outputs.new_release_notes }}

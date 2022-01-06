@@ -1,4 +1,4 @@
-name: semantic-release
+name: semantic_release
 
 on:
   workflow_call:
@@ -18,7 +18,7 @@ on:
 
 jobs:
 
-  generate:
+  semantic_release:
     runs-on: ubuntu-latest
     if:
       contains('
@@ -54,15 +54,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish:
-    needs:
-      - generate
-    runs-on: ubuntu-latest
-    if: ${{ needs.generate.outputs.new_release_published }}
-    steps:
-
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v1
+        if: ${{ steps.semantic_release.outputs.new_release_published }}
         with:
-          tag_name: v${{ needs.generate.outputs.new_release_version }}
-          body: ${{ needs.generate.outputs.new_release_notes }}
+          tag_name: v${{ steps.semantic_release.outputs.new_release_version }}
+          body: ${{ steps.semantic_release.outputs.new_release_notes }}

@@ -1,4 +1,4 @@
-name: Run semantic-release
+name: semantic-release
 
 on:
   workflow_call:
@@ -8,17 +8,17 @@ on:
         type: string
     outputs:
       new_release_published:
-        value: ${{ jobs.semantic_release.outputs.new_release_published }}
+        value: ${{ jobs.generate.outputs.new_release_published }}
       new_release_version:
-        value: ${{ jobs.semantic_release.outputs.new_release_version }}
+        value: ${{ jobs.generate.outputs.new_release_version }}
       new_release_channel:
-        value: ${{ jobs.semantic_release.outputs.new_release_channel }}
+        value: ${{ jobs.generate.outputs.new_release_channel }}
       new_release_notes:
-        value: ${{ jobs.semantic_release.outputs.new_release_notes }}
+        value: ${{ jobs.generate.outputs.new_release_notes }}
 
 jobs:
 
-  semantic_release:
+  generate:
     runs-on: ubuntu-latest
     if:
       contains('
@@ -53,3 +53,16 @@ jobs:
             conventional-changelog-conventionalcommits@4
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    needs:
+      - generate
+    runs-on: ubuntu-latest
+    if: ${{ needs.generate.outputs.new_release_published }}
+    steps:
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.version.outputs.new_release_version }}
+          body: ${{ needs.version.outputs.new_release_notes }}

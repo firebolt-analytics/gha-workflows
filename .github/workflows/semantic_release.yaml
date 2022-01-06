@@ -37,12 +37,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Configure registry
+        run: |
+          npm config set @myco:registry https://npm.pkg.github.com
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+
       - name: Semantic release
         id: semantic_release
         uses: cycjimmy/semantic-release-action@v2
         with:
           semantic_version: 18
-          extra_plugins: |
+          extends: |
             @firebolt-analytics/semantic-release-config-${{ inputs.template }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

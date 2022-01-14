@@ -22,7 +22,7 @@ jobs:
           # - FIR-123_some_feature
           # - no_issue_some_update
           # - dependabot/some_dependency
-          regex: ^((FIR\-\d+_|no_issue_|dependabot\/).+|[0-9]+\.([0-9]+|x)\.([0-9]+|x))$
+          regex: ^(([A-Z]+\-\d+_|no_issue_|dependabot\/).+|[0-9]+\.([0-9]+|x)\.([0-9]+|x))$
 
       - name: Validate PR title
         uses: amannn/action-semantic-pull-request@v3.4.6

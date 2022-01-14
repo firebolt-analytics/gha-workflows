@@ -1,0 +1,11 @@
+name: ci / push
+
+on:
+  push:
+
+jobs:
+
+  semantic_release:
+    uses: firebolt-analytics/gha-workflows/.github/workflows/semantic_release.yaml@main
+    with:
+      template: simple

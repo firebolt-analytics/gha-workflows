@@ -47,7 +47,7 @@ jobs:
         with:
           semantic_version: 18
           extends: |
-            @firebolt-analytics/semantic-release-config-${{ inputs.template }}@v1
+            @firebolt-analytics/semantic-release-config-${{ inputs.template }}@^1.x.x
           extra_plugins: |
             conventional-changelog-conventionalcommits@4
         env:

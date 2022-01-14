@@ -18,6 +18,6 @@ jobs:
     uses: firebolt-analytics/gha-workflows/.github/workflows/conventional_pr.yaml@main
 
   semantic_release:
-    uses: firebolt-analytics/gha-workflows/.github/workflows/semantic_release.yaml@main
+    uses: firebolt-analytics/gha-workflows/.github/workflows/semantic_release.yaml@no_issue_versionning
     with:
       template: simple

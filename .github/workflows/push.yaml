@@ -12,3 +12,14 @@ jobs:
     uses: firebolt-analytics/gha-workflows/.github/workflows/semantic_release.yaml@main
     with:
       template: simple
+
+  # Updates the major SemVer tag (e.g. v1, v2)
+  update_major_tag:
+    needs: semantic_release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: haya14busa/action-update-semver@v1
+        with:
+          tag: v${{ needs.semantic_release.outputs.new_release_version }}
+          major_version_tag_only: true

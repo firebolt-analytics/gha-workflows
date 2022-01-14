@@ -1,0 +1,17 @@
+name: ci / pr
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+jobs:
+
+  # Validate PR conventions
+  conventions:
+    uses: firebolt-analytics/gha-workflows/.github/workflows/conventional_pr.yaml@main

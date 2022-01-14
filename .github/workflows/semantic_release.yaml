@@ -40,7 +40,6 @@ jobs:
       - name: Configure registry
         run: |
           npm config set @firebolt-analytics:registry https://npm.pkg.github.com
-          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
 
       - name: Semantic release
         id: semantic_release
@@ -48,7 +47,7 @@ jobs:
         with:
           semantic_version: 18
           extends: |
-            @firebolt-analytics/semantic-release-config-${{ inputs.template }}
+            @firebolt-analytics/semantic-release-config-${{ inputs.template }}@v1
           extra_plugins: |
             conventional-changelog-conventionalcommits@4
         env:

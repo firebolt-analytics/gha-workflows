@@ -48,9 +48,10 @@ jobs:
         with:
           semantic_version: 18
           extends: |
-            @firebolt-analytics/semantic-release-config-${{ inputs.template }}@^1.x.x
+            @firebolt-analytics/semantic-release-config-${{ inputs.template }}
           extra_plugins: |
             conventional-changelog-conventionalcommits@4
+            @firebolt-analytics/semantic-release-config-${{ inputs.template }}@^1.x.x
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

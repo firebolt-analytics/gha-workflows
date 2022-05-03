@@ -41,7 +41,7 @@ jobs:
 
       - name: Deploy with helm
         run: |
-          helm upgrade ${{ inputs.release_name }} ${{ inputs.chart_path }} --install --wait --timeout ${{ inputs.timeout }} --atomic --namespace=${{ inputs.namespace }} --values=${{ inputs.chart_path }}/values.yaml --values=${{ inputs.chart_path }}/values/${{ inputs.environment }}.yaml
+          helm upgrade ${{ inputs.release_name }} ${{ inputs.chart_path }} --install --wait --timeout ${{ inputs.timeout }} --atomic --namespace=${{ inputs.namespace }} --values=${{ inputs.chart_path }}/values.yaml --values=${{ inputs.chart_path }}/values/${{ inputs.environment }}.yaml --set image.tag=${{ inputs.image_tag }}
 
       - name: Update version in values
         env:

@@ -1,0 +1,57 @@
+name: deploy
+
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+      release_name:
+        type: string
+        required: true
+      chart_path:
+        type: string
+        required: true
+      namespace:
+        type: string
+        required: true
+      timeout:
+        type: string
+        required: true
+
+jobs:
+  deploy:
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@v2"
+
+      - name: Setup helm
+        uses: "azure/setup-helm@v1"
+
+      - name: Setup yq
+        uses: "chrisdickinson/setup-yq@latest"
+
+      - name: Deploy with helm
+        run: |
+          helm upgrade ${{ inputs.release_name }} ${{ inputs.chart_path }} --install --wait --timeout ${{ inputs.timeout }} --atomic --namespace=${{ inputs.namespace }} --values=${{ inputs.chart_path }}/values.yaml --values=${{ inputs.chart_path }}/values/${{ inputs.environment }}.yaml
+
+      - name: Update version in values
+        env:
+          NEW_IMAGE_TAG: test
+        run: |
+          yq w -i helm/values/dev.yaml image.tag ${NEW_IMAGE_TAG}
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "chore(noticket): bump image version"
+          author: House Elf <house.elf@firebolt.io>

@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy helm chart
 
 on:
   workflow_call:
@@ -6,21 +6,28 @@ on:
       image_tag:
         type: string
         required: true
-      environment:
+        description: Image tag for values file. Expect image.tag parameter.
+      k8s_environment:
         type: string
         required: true
-      release_name:
+        description: Kubernetes environment. One of supported in the organization.
+      helm_release_name:
         type: string
         required: true
-      chart_path:
+        description: Helm release name.
+      helm_chart_path:
         type: string
         required: true
-      namespace:
+        description: Helm chart path. Supports links for published charts.
+      k8s_namespace:
         type: string
         required: true
-      timeout:
+        description: Kubernetes namespace for helm chart installation.
+      helm_timeout:
         type: string
-        required: true
+        required: false
+        description: Helm install timeout.
+        default: "2m"
 
 jobs:
   deploy:
@@ -41,17 +48,15 @@ jobs:
 
       - name: Deploy with helm
         run: |
-          helm upgrade ${{ inputs.release_name }} ${{ inputs.chart_path }} --install --wait --timeout ${{ inputs.timeout }} --atomic --namespace=${{ inputs.namespace }} --values=${{ inputs.chart_path }}/values.yaml --values=${{ inputs.chart_path }}/values/${{ inputs.environment }}.yaml --set image.tag=${{ inputs.image_tag }}
+          helm upgrade '${{ inputs.helm_release_name }}' '${{ inputs.helm_chart_path }}' --atomic --install --wait --timeout='${{ inputs.helm_timeout }}' --namespace='${{ inputs.k8s_namespace }}' --values='${{ inputs.helm_chart_path }}/values.yaml' --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}.yaml' --set image.tag='${{ inputs.image_tag }}'
 
       - name: Update version in values
         env:
-          NEW_IMAGE_TAG: test
+          NEW_IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          yq w -i helm/values/dev.yaml image.tag ${NEW_IMAGE_TAG}
+          yq w -i 'helm/values/${{ inputs.k8s_environment }}.yaml' image.tag ${NEW_IMAGE_TAG}
 
       - name: Create Pull Request
-        id: cpr
         uses: peter-evans/create-pull-request@v4
         with:
           title: "chore(noticket): bump image version"
-          author: House Elf <house.elf@firebolt.io>

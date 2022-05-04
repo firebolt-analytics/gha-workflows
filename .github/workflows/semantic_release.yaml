@@ -1,0 +1,67 @@
+name: semantic_release
+
+on:
+  workflow_call:
+    inputs:
+      template:
+        type: string
+        required: true
+      publish_release:
+        type: boolean
+        required: false
+        default: true
+    outputs:
+      new_release_published:
+        value: ${{ jobs.semantic_release.outputs.new_release_published }}
+      new_release_version:
+        value: ${{ jobs.semantic_release.outputs.new_release_version }}
+      new_release_channel:
+        value: ${{ jobs.semantic_release.outputs.new_release_channel }}
+      new_release_notes:
+        value: ${{ jobs.semantic_release.outputs.new_release_notes }}
+
+jobs:
+
+  semantic_release:
+    runs-on: ubuntu-latest
+    if:
+      contains('
+      refs/heads/main
+      refs/heads/master
+      refs/heads/staging
+      refs/heads/release
+      ', github.ref)
+    outputs:
+      new_release_published: ${{ steps.semantic_release.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic_release.outputs.new_release_version }}
+      new_release_channel: ${{ steps.semantic_release.outputs.new_release_channel }}
+      new_release_notes: ${{ steps.semantic_release.outputs.new_release_notes }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure registry
+        run: |
+          npm config set @firebolt-analytics:registry https://npm.pkg.github.com
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Semantic release
+        id: semantic_release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          semantic_version: 18
+          extends: |
+            @firebolt-analytics/semantic-release-config-${{ inputs.template }}
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@4
+            @firebolt-analytics/semantic-release-config-${{ inputs.template }}@^1.x.x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v1
+        if: ${{ inputs.publish_release && steps.semantic_release.outputs.new_release_published }}
+        with:
+          tag_name: v${{ steps.semantic_release.outputs.new_release_version }}
+          body: ${{ steps.semantic_release.outputs.new_release_notes }}

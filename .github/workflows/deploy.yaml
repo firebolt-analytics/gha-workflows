@@ -54,7 +54,7 @@ jobs:
         env:
           NEW_IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          yq w -i 'helm/values/${{ inputs.k8s_environment }}.yaml' image.tag '${NEW_IMAGE_TAG}'
+          yq w -i 'helm/values/${{ inputs.k8s_environment }}.yaml' image.tag "${NEW_IMAGE_TAG}"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4

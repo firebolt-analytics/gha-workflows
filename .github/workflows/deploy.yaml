@@ -59,7 +59,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: "chore(noticket): bump image version to ${{ inputs.image_tag }}"
+          title: "chore(noticket): ${{ inputs.helm_release_name }} version ${{ inputs.image_tag }} deployed to ${{ inputs.k8s_environment }}"
           body: |
             Version bump to ${{ inputs.image_tag }} after successful helm deployment
             NOTE: this is an automated PR by the create-pull-request GitHub action

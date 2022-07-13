@@ -11,6 +11,10 @@ on:
         type: string
         required: true
         description: Kubernetes environment. One of supported in the organization.
+      k8s_region:
+        type: string
+        required: true
+        description: Kubernetes region. One of supported in the organization.
       helm_release_name:
         type: string
         required: true
@@ -28,6 +32,11 @@ on:
         required: false
         description: Helm install timeout.
         default: "2m"
+      runner_label:
+        type: string
+        required: true
+        description: GHA Runner label. You may need one with custom tools on it for example.
+        default: "kubernetes"
 
 jobs:
   deploy:
@@ -35,7 +44,10 @@ jobs:
       id-token: write
       contents: write
       pull-requests: write
-    runs-on: self-hosted
+    runs-on: 
+      - self-hosted
+      - ${{ inputs.runner_label }}
+      - ${{ inputs.k8s_environment }}
     steps:
       - name: Checkout
         uses: "actions/checkout@v2"
@@ -48,7 +60,13 @@ jobs:
 
       - name: Deploy with helm
         run: |
-          helm upgrade '${{ inputs.helm_release_name }}' '${{ inputs.helm_chart_path }}' --atomic --install --wait --timeout='${{ inputs.helm_timeout }}' --namespace='${{ inputs.k8s_namespace }}' --values='${{ inputs.helm_chart_path }}/values.yaml' --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}.yaml' --set image.tag='${{ inputs.image_tag }}'
+          helm upgrade '${{ inputs.helm_release_name }}' '${{ inputs.helm_chart_path }}' \
+          --atomic --install --wait --timeout='${{ inputs.helm_timeout }}' \
+          --kubeconfig="${HOME}/.kube-${{ inputs.k8s_region }}/config" \
+          --namespace='${{ inputs.k8s_namespace }}' \
+          --values='${{ inputs.helm_chart_path }}/values.yaml' \
+          --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}.yaml' \
+          --set image.tag='${{ inputs.image_tag }}'
 
       - name: Update version in values
         env:

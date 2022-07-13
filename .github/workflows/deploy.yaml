@@ -13,7 +13,7 @@ on:
         description: Kubernetes environment. One of supported in the organization.
       k8s_region:
         type: string
-        required: true
+        required: false
         description: Kubernetes region. One of supported in the organization.
       helm_release_name:
         type: string
@@ -34,7 +34,7 @@ on:
         default: "2m"
       runner_label:
         type: string
-        required: true
+        required: false
         description: GHA Runner label. You may need one with custom tools on it for example.
         default: "kubernetes"
 

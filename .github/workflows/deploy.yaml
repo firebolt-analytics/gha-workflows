@@ -66,6 +66,7 @@ jobs:
           --namespace='${{ inputs.k8s_namespace }}' \
           --values='${{ inputs.helm_chart_path }}/values.yaml' \
           --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}.yaml' \
+          --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}/${{ inputs.k8s_region }}.yaml' \
           --set image.tag='${{ inputs.image_tag }}'
 
       - name: Update version in values

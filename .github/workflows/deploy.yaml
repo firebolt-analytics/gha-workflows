@@ -11,10 +11,14 @@ on:
         type: string
         required: true
         description: Kubernetes environment. One of supported in the organization.
-      k8s_region:
+      k8s_regions:
         type: string
-        required: false
-        description: Kubernetes region. One of supported in the organization.
+        required: true
+        description: List of Kubernetes regions. Supported for this particular environment
+        default: |
+          [
+            'us-east-1'
+          ]
       helm_release_name:
         type: string
         required: true
@@ -39,11 +43,28 @@ on:
         default: "kubernetes"
 
 jobs:
+  list-regions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          echo "::set-output name=matrix::$input"
+        env:
+          input: ${{ inputs.k8s_regions }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
   deploy:
+    needs:
+      - list-regions
     permissions:
       id-token: write
       contents: write
       pull-requests: write
+    strategy:
+      matrix:
+        region: ${{ fromJSON(needs.list-regions.outputs.matrix) }}
     runs-on: 
       - self-hosted
       - ${{ inputs.runner_label }}
@@ -62,23 +83,9 @@ jobs:
         run: |
           helm upgrade '${{ inputs.helm_release_name }}' '${{ inputs.helm_chart_path }}' \
           --atomic --install --wait --timeout='${{ inputs.helm_timeout }}' \
-          --kubeconfig="${HOME}/.kube-${{ inputs.k8s_region }}/config" \
+          --kubeconfig="${HOME}/.kube-${{ matrix.region }}/config" \
           --namespace='${{ inputs.k8s_namespace }}' \
           --values='${{ inputs.helm_chart_path }}/values.yaml' \
           --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}.yaml' \
-          --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}/${{ inputs.k8s_region }}.yaml' \
+          --values='${{ inputs.helm_chart_path }}/values/${{ inputs.k8s_environment }}/${{ matrix.region }}.yaml' \
           --set image.tag='${{ inputs.image_tag }}'
-
-      - name: Update version in values
-        env:
-          NEW_IMAGE_TAG: ${{ inputs.image_tag }}
-        run: |
-          yq w -i 'helm/values/${{ inputs.k8s_environment }}.yaml' image.tag ${NEW_IMAGE_TAG}
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          title: "chore(noticket): ${{ inputs.helm_release_name }} version ${{ inputs.image_tag }} deployed to ${{ inputs.k8s_environment }}"
-          body: |
-            Version bump to ${{ inputs.image_tag }} after successful helm deployment
-            NOTE: this is an automated PR by the create-pull-request GitHub action

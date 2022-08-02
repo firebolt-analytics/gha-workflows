@@ -46,7 +46,7 @@ jobs:
   list-regions:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-matrix
         run: |
           echo "::set-output name=matrix::$input"
@@ -72,7 +72,7 @@ jobs:
     environment: ${{ inputs.k8s_environment }}
     steps:
       - name: Checkout
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v3"
 
       - name: Setup helm
         uses: "azure/setup-helm@v1"

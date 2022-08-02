@@ -18,7 +18,7 @@ jobs:
     needs: semantic_release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: haya14busa/action-update-semver@v1
         with:
           tag: v${{ needs.semantic_release.outputs.new_release_version }}

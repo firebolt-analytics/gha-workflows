@@ -69,6 +69,7 @@ jobs:
       - self-hosted
       - ${{ inputs.runner_label }}
       - ${{ inputs.k8s_environment }}
+    environment: ${{ inputs.k8s_environment }}
     steps:
       - name: Checkout
         uses: "actions/checkout@v2"
